@@ -1,0 +1,78 @@
+:root {
+    --square-size: 50px;
+    --grid-line-size: 2px;
+    --dot-size: 25px;
+    --main-color: royalblue;
+}
+
+.square-container {
+    background-color: white;
+}
+
+.square {
+    display: inline-block;
+    width: var(--square-size);
+    height: var(--square-size);
+    border: 1px solid rgb(205, 206, 206);
+    position: relative;
+}
+
+.square::before, .square::after {
+    position: absolute;
+    content: '';
+    background-color: royalblue;
+    pointer-events: none;
+}
+
+.square::before {
+    top: 50%;
+    left: 0;
+    width: var(--square-size);;
+    height: var(--grid-line-size);;
+}
+
+.square::after {
+    left: 50%;
+    width: var(--grid-line-size);
+    height: var(--square-size);
+}
+
+/* Krawędzie - nadpisanie tylko tego co trzeba */
+.square.square-top::after {
+    top: 50%;
+    height: calc(var(--square-size) / 2);
+}
+.square.square-bottom::after {
+    height: calc(var(--square-size) / 2);
+}
+.square.square-left::before {
+    left: 50%;
+    width: calc(var(--square-size) / 2);
+}
+.square.square-right::before {
+    width: calc(var(--square-size) / 2);
+}
+.square.goal::after {
+    top: 0;
+    height: var(--square-size);
+    background-color: red;
+}
+
+/* kropka w środku kwadratu */
+.square .dot {
+    display: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: var(--dot-size);
+    height: var(--dot-size);
+    background: rgb(189, 128, 247);
+    border-radius: 50%;
+    transform: translate(-45%, -50%);
+    z-index: 999;
+    pointer-events: none;
+}
+
+.square:hover .dot {
+    display: block;
+}
