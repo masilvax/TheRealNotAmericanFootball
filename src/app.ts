@@ -102,11 +102,23 @@ function renderBoard(board: Point[][]): void {
             div.setAttribute('data-y', y.toString());
             container.appendChild(div);
 
-            const dot = document.createElement('span');
-            dot.className = 'dot';
-            div.appendChild(dot);
+            const point = getPointAt(x, y, board);
+            renderDots(point, div);
         }
         container.appendChild(document.createElement('br'));
+    }
+}
+
+function renderDots(point: Point | null, div: HTMLDivElement) {
+    if (point && currentPoint?.availablePoints?.includes(point)) {
+        const dot = document.createElement('span');
+        dot.className = 'available-dot';
+        div.appendChild(dot);
+    }
+    if (point === currentPoint) {
+        const currentDot = document.createElement('span');
+        currentDot.className = 'current-dot';
+        div.appendChild(currentDot);
     }
 }
 
@@ -120,11 +132,30 @@ function setupBoardClick(board: Point[][]) {
         const x = Number(target.getAttribute('data-x'));
         const y = Number(target.getAttribute('data-y'));
         const point = getPointAt(x, y, board);
-        if (point) {
+        if (point && currentPoint?.availablePoints?.includes(point)) {
+            const direction = getDirection(currentPoint, point);
+            currentPoint?.outgoingPaths?.push({ direction, color: 'blue' });
             currentPoint = point;
             console.log('New currentPoint:', currentPoint);
+            renderBoard(board);
         }
     });
+}
+
+function getDirection(from: Point, to: Point): 'up' | 'down' | 'left' | 'right' | 'up-left' | 'up-right' | 'down-left' | 'down-right' {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+
+    if (dx === 0 && dy < 0) return 'up';
+    if (dx === 0 && dy > 0) return 'down';
+    if (dx < 0 && dy === 0) return 'left';
+    if (dx > 0 && dy === 0) return 'right';
+    if (dx < 0 && dy < 0) return 'up-left';
+    if (dx > 0 && dy < 0) return 'up-right';
+    if (dx < 0 && dy > 0) return 'down-left';
+    if (dx > 0 && dy > 0) return 'down-right';
+
+    throw new Error('Invalid direction');
 }
 
 function main(): void {

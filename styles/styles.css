@@ -62,7 +62,7 @@
     background-color: red;
 }
 
-.square .dot {
+.square .available-dot, .square .current-dot {
     display: none;
     position: absolute;
     top: 50%;
@@ -76,6 +76,10 @@
     pointer-events: none;
 }
 
-.square:hover .dot {
+.square:hover .available-dot, .square .current-dot {
     display: block;
+}
+
+.square .current-dot {
+    background: rgb(15, 99, 12);
 }

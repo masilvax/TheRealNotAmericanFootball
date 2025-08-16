@@ -97,11 +97,23 @@ function renderBoard(board) {
             div.setAttribute('data-x', x.toString());
             div.setAttribute('data-y', y.toString());
             container.appendChild(div);
-            const dot = document.createElement('span');
-            dot.className = 'dot';
-            div.appendChild(dot);
+            const point = getPointAt(x, y, board);
+            renderDots(point, div);
         }
         container.appendChild(document.createElement('br'));
+    }
+}
+function renderDots(point, div) {
+    var _a;
+    if (point && ((_a = currentPoint === null || currentPoint === void 0 ? void 0 : currentPoint.availablePoints) === null || _a === void 0 ? void 0 : _a.includes(point))) {
+        const dot = document.createElement('span');
+        dot.className = 'available-dot';
+        div.appendChild(dot);
+    }
+    if (point === currentPoint) {
+        const currentDot = document.createElement('span');
+        currentDot.className = 'current-dot';
+        div.appendChild(currentDot);
     }
 }
 // Dodaj delegację zdarzeń po wyrenderowaniu planszy
@@ -110,17 +122,42 @@ function setupBoardClick(board) {
     if (!container)
         return;
     container.addEventListener('click', (event) => {
+        var _a, _b;
         const target = event.target.closest('.square');
         if (!target)
             return;
         const x = Number(target.getAttribute('data-x'));
         const y = Number(target.getAttribute('data-y'));
         const point = getPointAt(x, y, board);
-        if (point) {
+        if (point && ((_a = currentPoint === null || currentPoint === void 0 ? void 0 : currentPoint.availablePoints) === null || _a === void 0 ? void 0 : _a.includes(point))) {
+            const direction = getDirection(currentPoint, point);
+            (_b = currentPoint === null || currentPoint === void 0 ? void 0 : currentPoint.outgoingPaths) === null || _b === void 0 ? void 0 : _b.push({ direction, color: 'blue' });
             currentPoint = point;
             console.log('New currentPoint:', currentPoint);
+            renderBoard(board);
         }
     });
+}
+function getDirection(from, to) {
+    const dx = to.x - from.x;
+    const dy = to.y - from.y;
+    if (dx === 0 && dy < 0)
+        return 'up';
+    if (dx === 0 && dy > 0)
+        return 'down';
+    if (dx < 0 && dy === 0)
+        return 'left';
+    if (dx > 0 && dy === 0)
+        return 'right';
+    if (dx < 0 && dy < 0)
+        return 'up-left';
+    if (dx > 0 && dy < 0)
+        return 'up-right';
+    if (dx < 0 && dy > 0)
+        return 'down-left';
+    if (dx > 0 && dy > 0)
+        return 'down-right';
+    throw new Error('Invalid direction');
 }
 function main() {
     const board = createBoard(9, 11);
