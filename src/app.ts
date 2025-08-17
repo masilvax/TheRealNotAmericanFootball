@@ -1,6 +1,7 @@
 import { Point } from "./types";
 
 let currentPoint: Point | null = null;
+let turn: 'red' | 'blue' = 'red';
 
 function getAvailablePoints(x: number, y: number, width: number, height: number, board: Point[][]): Point[] {
     // Wszystkie możliwe kierunki
@@ -63,6 +64,10 @@ function createBoard(width: number, height: number): Point[][] {
     for (let y = 0; y < height; y++) {
         for (let x = 0; x < width; x++) {
             board[y][x].availablePoints = getAvailablePoints(x, y, width, height, board);
+            // Ustaw taken na true dla krawędzi planszy
+            if (x === 0 || x === width - 1 || y === 0 || y === height - 1) {
+                board[y][x].taken = true;
+            }
         }
     }
 
@@ -77,6 +82,8 @@ function getPointAt(x: number, y: number, board: Point[][]): Point | null {
 
 function renderBoard(board: Point[][]): void {
     const container = document.querySelector('.square-container');
+    container?.setAttribute('style', `grid-template-columns: repeat(${board[0].length}, var(--square-size));`); 
+
     if (!container) return;
 
     container.innerHTML = '';
@@ -96,7 +103,7 @@ function renderBoard(board: Point[][]): void {
             if (x === 0) classes.push('square-left');
             if (x === width - 1) classes.push('square-right');
             div.className = classes.join(' ');
-            div.textContent = `${x},${y}`;
+            //div.textContent = `${x},${y}`;
 
             div.setAttribute('data-x', x.toString());
             div.setAttribute('data-y', y.toString());
@@ -106,7 +113,6 @@ function renderBoard(board: Point[][]): void {
             renderPaths(point, div);
             renderDots(point, div);
         }
-        container.appendChild(document.createElement('br'));
     }
 }
 
@@ -130,6 +136,7 @@ function renderDots(point: Point | null, div: HTMLDivElement) {
     if (point === currentPoint) {
         const currentDot = document.createElement('span');
         currentDot.className = 'current-dot';
+        currentDot.style.backgroundColor = turn;
         div.appendChild(currentDot);
     }
 }
@@ -145,14 +152,21 @@ function setupBoardClick(board: Point[][]) {
         const y = Number(target.getAttribute('data-y'));
         const point = getPointAt(x, y, board);
         if (point && currentPoint?.availablePoints?.includes(point)) {
+
             // remove avalablePoint from currentPoint and clicked point accordingly
             currentPoint.availablePoints = currentPoint.availablePoints.filter(p => p !== point);
             point.availablePoints = point.availablePoints?.filter(p => p !== currentPoint);
             
             const direction = getDirection(currentPoint, point);
-            currentPoint?.outgoingPaths?.push({ direction, color: 'red' });
+            currentPoint?.outgoingPaths?.push({ direction, color: turn });
             currentPoint = point;
             console.log('New currentPoint:', currentPoint);
+
+            if (!point.taken) {
+                turn = turn === 'red' ? 'blue' : 'red';    
+            }
+            point.taken = true;
+            
             renderBoard(board);
         }
     });
@@ -177,6 +191,9 @@ function getDirection(from: Point, to: Point): 'up' | 'down' | 'left' | 'right' 
 function main(): void {
     const board: Point[][] = createBoard(9, 11);
     currentPoint = getPointAt(4, 5, board);
+    if (currentPoint) {
+        currentPoint.taken = true;
+    }
     console.log("Board initialized:", board, 'Current Point:', currentPoint);
     renderBoard(board);
     setupBoardClick(board);

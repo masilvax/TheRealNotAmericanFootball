@@ -7,6 +7,7 @@
 
 .square-container {
     background-color: white;
+    display: grid;
 }
 
 .square {
@@ -78,10 +79,6 @@
 
 .square:hover .available-dot, .square .current-dot {
     display: block;
-}
-
-.square .current-dot {
-    background: rgb(0, 143, 0);
 }
 
 .path {
