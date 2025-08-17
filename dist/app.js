@@ -98,10 +98,22 @@ function renderBoard(board) {
             div.setAttribute('data-y', y.toString());
             container.appendChild(div);
             const point = getPointAt(x, y, board);
+            renderPaths(point, div);
             renderDots(point, div);
         }
         container.appendChild(document.createElement('br'));
     }
+}
+function renderPaths(point, div) {
+    if (!point || !point.outgoingPaths || point.outgoingPaths.length === 0)
+        return;
+    point.outgoingPaths.forEach(path => {
+        var _a;
+        const pathDiv = document.createElement('div');
+        pathDiv.className = `path path-${path.direction}`;
+        pathDiv.style.backgroundColor = (_a = path.color) !== null && _a !== void 0 ? _a : 'black';
+        div.appendChild(pathDiv);
+    });
 }
 function renderDots(point, div) {
     var _a;
@@ -122,7 +134,7 @@ function setupBoardClick(board) {
     if (!container)
         return;
     container.addEventListener('click', (event) => {
-        var _a, _b;
+        var _a, _b, _c;
         const target = event.target.closest('.square');
         if (!target)
             return;
@@ -130,8 +142,11 @@ function setupBoardClick(board) {
         const y = Number(target.getAttribute('data-y'));
         const point = getPointAt(x, y, board);
         if (point && ((_a = currentPoint === null || currentPoint === void 0 ? void 0 : currentPoint.availablePoints) === null || _a === void 0 ? void 0 : _a.includes(point))) {
+            // remove avalablePoint from currentPoint and clicked point accordingly
+            currentPoint.availablePoints = currentPoint.availablePoints.filter(p => p !== point);
+            point.availablePoints = (_b = point.availablePoints) === null || _b === void 0 ? void 0 : _b.filter(p => p !== currentPoint);
             const direction = getDirection(currentPoint, point);
-            (_b = currentPoint === null || currentPoint === void 0 ? void 0 : currentPoint.outgoingPaths) === null || _b === void 0 ? void 0 : _b.push({ direction, color: 'blue' });
+            (_c = currentPoint === null || currentPoint === void 0 ? void 0 : currentPoint.outgoingPaths) === null || _c === void 0 ? void 0 : _c.push({ direction, color: 'red' });
             currentPoint = point;
             console.log('New currentPoint:', currentPoint);
             renderBoard(board);

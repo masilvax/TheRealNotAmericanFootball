@@ -13,14 +13,14 @@
     display: inline-block;
     width: var(--square-size);
     height: var(--square-size);
-    border: 1px solid rgb(205, 206, 206);
+    /* border: 1px solid rgb(205, 206, 206); */
     position: relative;
 }
 
 .square::before, .square::after {
     position: absolute;
     content: '';
-    background-color: royalblue;
+    background-color: rgb(168, 213, 255);
     pointer-events: none;
 }
 
@@ -59,7 +59,7 @@
 .square.goal::after {
     top: 0;
     height: var(--square-size);
-    background-color: red;
+    background-color: rgb(0, 143, 0);
 }
 
 .square .available-dot, .square .current-dot {
@@ -81,5 +81,70 @@
 }
 
 .square .current-dot {
-    background: rgb(15, 99, 12);
+    background: rgb(0, 143, 0);
+}
+
+.path {
+    position: absolute;
+    background-color: red;
+    z-index: 99;
+}
+
+.path-left {
+    top: 50%;
+    left: -50%;
+    width: var(--square-size);
+    height: var(--grid-line-size);
+}
+
+.path-right {
+    top: 50%;
+    left: 50%;
+    width: var(--square-size);
+    height: var(--grid-line-size);
+}
+
+.path-up {
+    top: -50%;
+    left: 50%;
+    width: var(--grid-line-size);
+    height: var(--square-size);
+}
+.path-down {
+    top: 50%;
+    left: 50%;
+    width: var(--grid-line-size);
+    height: var(--square-size);
+}
+
+.path-down-left {
+    top: 100%;
+    left: calc(-50% - 9px);
+    width: calc(var(--square-size) * 1.4142);
+    height: var(--grid-line-size);
+    transform: rotate(-45deg);
+}
+
+.path-down-right {
+    top: 100%;
+    left: calc(50% - 9px);
+    width: calc(var(--square-size) * 1.4142);
+    height: var(--grid-line-size);
+    transform: rotate(45deg);
+}
+
+.path-up-left {
+    top: 0;
+    left: calc(-50% - 9px);
+    width: calc(var(--square-size) * 1.4142);
+    height: var(--grid-line-size);
+    transform: rotate(45deg);
+}
+
+.path-up-right {
+    top: 0;
+    left: calc(50% - 9px);
+    width: calc(var(--square-size) * 1.4142);
+    height: var(--grid-line-size);
+    transform: rotate(-45deg);
 }

@@ -103,10 +103,22 @@ function renderBoard(board: Point[][]): void {
             container.appendChild(div);
 
             const point = getPointAt(x, y, board);
+            renderPaths(point, div);
             renderDots(point, div);
         }
         container.appendChild(document.createElement('br'));
     }
+}
+
+function renderPaths(point: Point | null, div: HTMLDivElement) {
+    if (!point || !point.outgoingPaths || point.outgoingPaths.length === 0) return;
+
+    point.outgoingPaths.forEach(path => {
+        const pathDiv = document.createElement('div');
+        pathDiv.className = `path path-${path.direction}`;
+        pathDiv.style.backgroundColor = path.color ?? 'black';
+        div.appendChild(pathDiv);
+    });
 }
 
 function renderDots(point: Point | null, div: HTMLDivElement) {
@@ -133,8 +145,12 @@ function setupBoardClick(board: Point[][]) {
         const y = Number(target.getAttribute('data-y'));
         const point = getPointAt(x, y, board);
         if (point && currentPoint?.availablePoints?.includes(point)) {
+            // remove avalablePoint from currentPoint and clicked point accordingly
+            currentPoint.availablePoints = currentPoint.availablePoints.filter(p => p !== point);
+            point.availablePoints = point.availablePoints?.filter(p => p !== currentPoint);
+            
             const direction = getDirection(currentPoint, point);
-            currentPoint?.outgoingPaths?.push({ direction, color: 'blue' });
+            currentPoint?.outgoingPaths?.push({ direction, color: 'red' });
             currentPoint = point;
             console.log('New currentPoint:', currentPoint);
             renderBoard(board);
