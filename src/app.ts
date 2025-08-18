@@ -1,9 +1,40 @@
 import { Point } from "./types";
 
+let board: Point[][] = [];
 let currentPoint: Point | null = null;
 let turn: 'red' | 'blue' = 'red';
 
-function getAvailablePoints(x: number, y: number, width: number, height: number, board: Point[][]): Point[] {
+function createBoard(width: number, height: number) {
+    if (height % 2 === 0) height++;
+    if (width % 2 === 0) width++;
+
+    board = Array.from({ length: height }, (_, y) =>
+        Array.from({ length: width }, (_, x) => ({
+            taken: false,
+            x,
+            y,
+            outgoingPaths: [],
+            availablePoints: [],
+        }))
+    );
+
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            board[y][x].availablePoints = getAvailablePoints(x, y, width, height);
+            // Ustaw taken na true dla krawędzi planszy
+            if (x === 0 || x === width - 1 || y === 0 || y === height - 1) {
+                board[y][x].taken = true;
+            }
+        }
+    }
+}
+
+function getPointAt(x: number, y: number): Point | null {
+    if (y < 0 || y >= board.length || x < 0 || x >= board[0].length) return null;
+    return board[y][x];
+}
+
+function getAvailablePoints(x: number, y: number, width: number, height: number): Point[] {
     // Wszystkie możliwe kierunki
     const directions = [
         { dx: -1, dy: 0 }, { dx: 1, dy: 0 }, { dx: 0, dy: -1 }, { dx: 0, dy: 1 },
@@ -47,40 +78,7 @@ function getAvailablePoints(x: number, y: number, width: number, height: number,
         .filter((p): p is Point => p !== null);
 }
 
-function createBoard(width: number, height: number): Point[][] {
-    if (height % 2 === 0) height++;
-    if (width % 2 === 0) width++;
-
-    const board: Point[][] = Array.from({ length: height }, (_, y) =>
-        Array.from({ length: width }, (_, x) => ({
-            taken: false,
-            x,
-            y,
-            outgoingPaths: [],
-            availablePoints: [],
-        }))
-    );
-
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            board[y][x].availablePoints = getAvailablePoints(x, y, width, height, board);
-            // Ustaw taken na true dla krawędzi planszy
-            if (x === 0 || x === width - 1 || y === 0 || y === height - 1) {
-                board[y][x].taken = true;
-            }
-        }
-    }
-
-    return board;
-}
-
-function getPointAt(x: number, y: number, board: Point[][]): Point | null {
-    if (y < 0 || y >= board.length || x < 0 || x >= board[0].length) return null;
-    return board[y][x];
-}
-
-
-function renderBoard(board: Point[][]): void {
+function renderBoard(): void {
     const container = document.querySelector('.square-container');
     container?.setAttribute('style', `grid-template-columns: repeat(${board[0].length}, var(--square-size));`); 
 
@@ -109,7 +107,7 @@ function renderBoard(board: Point[][]): void {
             div.setAttribute('data-y', y.toString());
             container.appendChild(div);
 
-            const point = getPointAt(x, y, board);
+            const point = getPointAt(x, y);
             renderPaths(point, div);
             renderDots(point, div);
         }
@@ -142,7 +140,7 @@ function renderDots(point: Point | null, div: HTMLDivElement) {
 }
 
 // Dodaj delegację zdarzeń po wyrenderowaniu planszy
-function setupBoardClick(board: Point[][]) {
+function setBoardClick() {
     const container = document.querySelector('.square-container');
     if (!container) return;
     container.addEventListener('click', (event) => {
@@ -150,7 +148,7 @@ function setupBoardClick(board: Point[][]) {
         if (!target) return;
         const x = Number(target.getAttribute('data-x'));
         const y = Number(target.getAttribute('data-y'));
-        const point = getPointAt(x, y, board);
+        const point = getPointAt(x, y);
         if (point && currentPoint?.availablePoints?.includes(point)) {
 
             // remove avalablePoint from currentPoint and clicked point accordingly
@@ -167,9 +165,29 @@ function setupBoardClick(board: Point[][]) {
             }
             point.taken = true;
             
-            renderBoard(board);
+            renderBoard();
         }
     });
+}
+
+function setResetButton() {
+    const resetButton = document.getElementById('reset');
+    if (resetButton) {
+        resetButton.addEventListener('click', () => {
+            initializeGame();
+        })
+    }
+}
+
+function setChangeTurnButton() {
+    const changeTurnButton = document.getElementById('change-turn');
+    if (changeTurnButton) {
+        const changeTurn = () => {
+            turn = turn === 'red' ? 'blue' : 'red';
+            renderBoard();
+        };
+        changeTurnButton.addEventListener('click', changeTurn);
+    }
 }
 
 function getDirection(from: Point, to: Point): 'up' | 'down' | 'left' | 'right' | 'up-left' | 'up-right' | 'down-left' | 'down-right' {
@@ -188,64 +206,18 @@ function getDirection(from: Point, to: Point): 'up' | 'down' | 'left' | 'right' 
     throw new Error('Invalid direction');
 }
 
-function main(): void {
-    const board: Point[][] = createBoard(9, 11);
-    currentPoint = getPointAt(4, 5, board);
+function initializeGame(): void {
+    createBoard(9, 11);
+    turn = turn === 'red' ? 'blue' : 'red';
+    currentPoint = getPointAt(4, 5);
     if (currentPoint) {
         currentPoint.taken = true;
     }
     console.log("Board initialized:", board, 'Current Point:', currentPoint);
-    renderBoard(board);
-    setupBoardClick(board);
+    renderBoard();
 }
 
-main();
-
-
-// function createBoard(width: number, height: number): Point[][] {
-//     // sprawdź czy height i width są nieparzyste i jeśli nie, to zwiększ je o 1
-//     if (height % 2 === 0) height++;
-//     if (width % 2 === 0) width++;
-//     // Najpierw utwórz tablicę punktów bez availablePoints
-//     const board: Point[][] = Array.from({ length: height }, (_, y) =>
-//         Array.from({ length: width }, (_, x) => ({
-//             taken: false,
-//             x,
-//             y,
-//             outgoingPaths: [],
-//             availablePoints: [],
-//         }))
-//     );
-
-//     // Teraz ustaw availablePoints dla każdego punktu
-//     const directions = [
-//         { dx: -1, dy: 0 }, // lewo
-//         { dx: 1, dy: 0 }, // prawo
-//         { dx: 0, dy: -1 }, // góra
-//         { dx: 0, dy: 1 }, // dół
-//         { dx: -1, dy: -1 }, // lewy-górny róg
-//         { dx: 1, dy: -1 }, // prawy-górny róg
-//         { dx: -1, dy: 1 }, // lewy-dolny róg
-//         { dx: 1, dy: 1 }, // prawy-dolny róg
-//     ];
-
-// for (let y = 0; y < height; y++) {
-//     for (let x = 0; x < width; x++) {
-//         const neighbors: Point[] = [];
-//         for (const { dx, dy } of directions) {
-//             const nx = x + dx;
-//             const ny = y + dy;
-//             if (ny >= 0 && ny < height && nx >= 0 && nx < width) {
-//                 neighbors.push(board[ny][nx]);
-//             }
-//         }
-//         board[y][x].availablePoints = neighbors;
-//     }
-// }
-
-//     determineAvailablePoints(height, width, directions, board);
-
-//     return board;
-// }
-
-
+initializeGame();
+setBoardClick();
+setResetButton();
+setChangeTurnButton();

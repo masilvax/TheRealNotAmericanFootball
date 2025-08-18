@@ -1,7 +1,7 @@
 :root {
     --square-size: 50px;
     --grid-line-size: 2px;
-    --dot-size: 25px;
+    --dot-size: 15px;
     --main-color: royalblue;
 }
 
@@ -74,17 +74,22 @@
     border-radius: 50%;
     transform: translate(-45%, -50%);
     z-index: 999;
-    pointer-events: none;
 }
 
-.square:hover .available-dot, .square .current-dot {
+.square:hover .available-dot {
     display: block;
+    cursor: pointer;
 }
+
+ .square .current-dot {
+    display: block;
+ }
 
 .path {
     position: absolute;
     background-color: red;
     z-index: 99;
+    pointer-events: none;
 }
 
 .path-left {
