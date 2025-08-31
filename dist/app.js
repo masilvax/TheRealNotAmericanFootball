@@ -11,6 +11,7 @@ function createBoard(width, height) {
         height++;
     if (width % 2 === 0)
         width++;
+    clearPreviousState();
     board = Array.from({ length: height }, (_, y) => Array.from({ length: width }, (_, x) => ({
         taken: false,
         x,
@@ -27,6 +28,13 @@ function createBoard(width, height) {
             }
         }
     }
+}
+function clearPreviousState() {
+    previousState = {
+        board: [],
+        currentPoint: null,
+        turn: 'red'
+    };
 }
 function getPointAt(x, y, board) {
     if (y < 0 || y >= board.length || x < 0 || x >= board[0].length)
@@ -81,7 +89,8 @@ function getAvailablePoints(x, y, width, height) {
 }
 function renderBoard() {
     const container = document.querySelector('.square-container');
-    container === null || container === void 0 ? void 0 : container.setAttribute('style', `grid-template-columns: repeat(${board[0].length}, var(--square-size));`);
+    // container?.setAttribute('style', `grid-template-columns: repeat(${board[0].length}, var(--square-size));`);
+    container === null || container === void 0 ? void 0 : container.setAttribute('style', `width: calc(var(--square-size) * ${board[0].length});grid-template-columns: repeat(${board[0].length}, var(--square-size));`);
     if (!container)
         return;
     container.innerHTML = '';
@@ -190,6 +199,7 @@ function setResetButton() {
     const resetButton = document.getElementById('reset');
     if (resetButton) {
         resetButton.addEventListener('click', () => {
+            console.log('Resetting game');
             initializeGame();
         });
     }
@@ -198,8 +208,10 @@ function setChangeTurnButton() {
     const changeTurnButton = document.getElementById('change-turn');
     if (changeTurnButton) {
         const changeTurn = () => {
+            console.log('Changing turn from', turn, 'to', turn === 'red' ? 'blue' : 'red');
             turn = turn === 'red' ? 'blue' : 'red';
             renderBoard();
+            console.log('Changing turn from done');
         };
         changeTurnButton.addEventListener('click', changeTurn);
     }
@@ -209,10 +221,14 @@ function setUndoButton() {
     if (undoButton) {
         undoButton.addEventListener('click', () => {
             var _a, _b, _c, _d;
-            board = previousState.board;
-            currentPoint = getPointAt((_b = (_a = previousState.currentPoint) === null || _a === void 0 ? void 0 : _a.x) !== null && _b !== void 0 ? _b : -1, (_d = (_c = previousState.currentPoint) === null || _c === void 0 ? void 0 : _c.y) !== null && _d !== void 0 ? _d : -1, previousState.board);
-            turn = previousState.turn;
-            renderBoard();
+            console.log('Undoing last move');
+            if (previousState.board && previousState.board.length > 0) {
+                board = previousState.board;
+                currentPoint = getPointAt((_b = (_a = previousState.currentPoint) === null || _a === void 0 ? void 0 : _a.x) !== null && _b !== void 0 ? _b : -1, (_d = (_c = previousState.currentPoint) === null || _c === void 0 ? void 0 : _c.y) !== null && _d !== void 0 ? _d : -1, previousState.board);
+                turn = previousState.turn;
+                clearPreviousState();
+                renderBoard();
+            }
         });
     }
 }
