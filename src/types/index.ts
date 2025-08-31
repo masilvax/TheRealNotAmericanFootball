@@ -13,3 +13,12 @@ export interface Path {
     direction: 'up' | 'down' | 'left' | 'right' | 'up-left' | 'up-right' | 'down-left' | 'down-right';
     color?: string;
 }
+
+export interface PrevoiusState {
+    board: Point[][];
+    currentPoint: Point | null;
+    turn: Turn;
+}
+
+export type Turn = 'red' | 'blue';
+export type Direction = 'up' | 'down' | 'left' | 'right' | 'up-left' | 'up-right' | 'down-left' | 'down-right';

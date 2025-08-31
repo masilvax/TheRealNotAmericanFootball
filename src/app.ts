@@ -1,8 +1,14 @@
-import { Point } from "./types";
+import { Direction, Point, PrevoiusState, Turn } from "./types";
 
 let board: Point[][] = [];
 let currentPoint: Point | null = null;
-let turn: 'red' | 'blue' = 'red';
+let turn: Turn = 'red';
+
+let previousState: PrevoiusState = {
+    board: [],
+    currentPoint: null,
+    turn: 'red'
+};
 
 function createBoard(width: number, height: number) {
     if (height % 2 === 0) height++;
@@ -29,7 +35,7 @@ function createBoard(width: number, height: number) {
     }
 }
 
-function getPointAt(x: number, y: number): Point | null {
+function getPointAt(x: number, y: number, board: Point[][]): Point | null {
     if (y < 0 || y >= board.length || x < 0 || x >= board[0].length) return null;
     return board[y][x];
 }
@@ -80,7 +86,7 @@ function getAvailablePoints(x: number, y: number, width: number, height: number)
 
 function renderBoard(): void {
     const container = document.querySelector('.square-container');
-    container?.setAttribute('style', `grid-template-columns: repeat(${board[0].length}, var(--square-size));`); 
+    container?.setAttribute('style', `grid-template-columns: repeat(${board[0].length}, var(--square-size));`);
 
     if (!container) return;
 
@@ -107,7 +113,7 @@ function renderBoard(): void {
             div.setAttribute('data-y', y.toString());
             container.appendChild(div);
 
-            const point = getPointAt(x, y);
+            const point = getPointAt(x, y, board);
             renderPaths(point, div);
             renderDots(point, div);
         }
@@ -148,26 +154,45 @@ function setBoardClick() {
         if (!target) return;
         const x = Number(target.getAttribute('data-x'));
         const y = Number(target.getAttribute('data-y'));
-        const point = getPointAt(x, y);
+        const point = getPointAt(x, y, board);
         if (point && currentPoint?.availablePoints?.includes(point)) {
+
+            previousState = {
+                board: structuredClone(board),
+                currentPoint: currentPoint ? structuredClone(currentPoint) : null,
+                turn: turn
+            };
 
             // remove avalablePoint from currentPoint and clicked point accordingly
             currentPoint.availablePoints = currentPoint.availablePoints.filter(p => p !== point);
             point.availablePoints = point.availablePoints?.filter(p => p !== currentPoint);
-            
+
             const direction = getDirection(currentPoint, point);
-            currentPoint?.outgoingPaths?.push({ direction, color: turn });
+            currentPoint?.outgoingPaths?.push({ direction, color: 'lime' });
             currentPoint = point;
             console.log('New currentPoint:', currentPoint);
 
             if (!point.taken) {
-                turn = turn === 'red' ? 'blue' : 'red';    
+                changeTurn();
             }
             point.taken = true;
-            
+
             renderBoard();
         }
     });
+}
+
+function changeTurn() {
+    board.forEach(row => {
+        row.forEach(p => {
+            p.outgoingPaths?.forEach(path => {
+                if (path.color === 'lime') {
+                    path.color = turn;
+                }
+            })
+        })                
+    })
+    turn = turn === 'red' ? 'blue' : 'red';
 }
 
 function setResetButton() {
@@ -190,7 +215,19 @@ function setChangeTurnButton() {
     }
 }
 
-function getDirection(from: Point, to: Point): 'up' | 'down' | 'left' | 'right' | 'up-left' | 'up-right' | 'down-left' | 'down-right' {
+function setUndoButton() {
+    const undoButton = document.getElementById('undo');
+    if (undoButton) {
+        undoButton.addEventListener('click', () => {
+            board = previousState.board;
+            currentPoint = getPointAt(previousState.currentPoint?.x ?? -1, previousState.currentPoint?.y ?? -1, previousState.board)
+            turn = previousState.turn;
+            renderBoard();
+        });
+    }
+}
+
+function getDirection(from: Point, to: Point): Direction {
     const dx = to.x - from.x;
     const dy = to.y - from.y;
 
@@ -209,7 +246,7 @@ function getDirection(from: Point, to: Point): 'up' | 'down' | 'left' | 'right' 
 function initializeGame(): void {
     createBoard(9, 11);
     turn = turn === 'red' ? 'blue' : 'red';
-    currentPoint = getPointAt(4, 5);
+    currentPoint = getPointAt(4, 5, board);
     if (currentPoint) {
         currentPoint.taken = true;
     }
@@ -221,3 +258,4 @@ initializeGame();
 setBoardClick();
 setResetButton();
 setChangeTurnButton();
+setUndoButton()

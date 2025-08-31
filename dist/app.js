@@ -1,6 +1,11 @@
 let board = [];
 let currentPoint = null;
 let turn = 'red';
+let previousState = {
+    board: [],
+    currentPoint: null,
+    turn: 'red'
+};
 function createBoard(width, height) {
     if (height % 2 === 0)
         height++;
@@ -23,7 +28,7 @@ function createBoard(width, height) {
         }
     }
 }
-function getPointAt(x, y) {
+function getPointAt(x, y, board) {
     if (y < 0 || y >= board.length || x < 0 || x >= board[0].length)
         return null;
     return board[y][x];
@@ -103,7 +108,7 @@ function renderBoard() {
             div.setAttribute('data-x', x.toString());
             div.setAttribute('data-y', y.toString());
             container.appendChild(div);
-            const point = getPointAt(x, y);
+            const point = getPointAt(x, y, board);
             renderPaths(point, div);
             renderDots(point, div);
         }
@@ -146,22 +151,40 @@ function setBoardClick() {
             return;
         const x = Number(target.getAttribute('data-x'));
         const y = Number(target.getAttribute('data-y'));
-        const point = getPointAt(x, y);
+        const point = getPointAt(x, y, board);
         if (point && ((_a = currentPoint === null || currentPoint === void 0 ? void 0 : currentPoint.availablePoints) === null || _a === void 0 ? void 0 : _a.includes(point))) {
+            previousState = {
+                board: structuredClone(board),
+                currentPoint: currentPoint ? structuredClone(currentPoint) : null,
+                turn: turn
+            };
             // remove avalablePoint from currentPoint and clicked point accordingly
             currentPoint.availablePoints = currentPoint.availablePoints.filter(p => p !== point);
             point.availablePoints = (_b = point.availablePoints) === null || _b === void 0 ? void 0 : _b.filter(p => p !== currentPoint);
             const direction = getDirection(currentPoint, point);
-            (_c = currentPoint === null || currentPoint === void 0 ? void 0 : currentPoint.outgoingPaths) === null || _c === void 0 ? void 0 : _c.push({ direction, color: turn });
+            (_c = currentPoint === null || currentPoint === void 0 ? void 0 : currentPoint.outgoingPaths) === null || _c === void 0 ? void 0 : _c.push({ direction, color: 'lime' });
             currentPoint = point;
             console.log('New currentPoint:', currentPoint);
             if (!point.taken) {
-                turn = turn === 'red' ? 'blue' : 'red';
+                changeTurn();
             }
             point.taken = true;
             renderBoard();
         }
     });
+}
+function changeTurn() {
+    board.forEach(row => {
+        row.forEach(p => {
+            var _a;
+            (_a = p.outgoingPaths) === null || _a === void 0 ? void 0 : _a.forEach(path => {
+                if (path.color === 'lime') {
+                    path.color = turn;
+                }
+            });
+        });
+    });
+    turn = turn === 'red' ? 'blue' : 'red';
 }
 function setResetButton() {
     const resetButton = document.getElementById('reset');
@@ -179,6 +202,18 @@ function setChangeTurnButton() {
             renderBoard();
         };
         changeTurnButton.addEventListener('click', changeTurn);
+    }
+}
+function setUndoButton() {
+    const undoButton = document.getElementById('undo');
+    if (undoButton) {
+        undoButton.addEventListener('click', () => {
+            var _a, _b, _c, _d;
+            board = previousState.board;
+            currentPoint = getPointAt((_b = (_a = previousState.currentPoint) === null || _a === void 0 ? void 0 : _a.x) !== null && _b !== void 0 ? _b : -1, (_d = (_c = previousState.currentPoint) === null || _c === void 0 ? void 0 : _c.y) !== null && _d !== void 0 ? _d : -1, previousState.board);
+            turn = previousState.turn;
+            renderBoard();
+        });
     }
 }
 function getDirection(from, to) {
@@ -205,7 +240,7 @@ function getDirection(from, to) {
 function initializeGame() {
     createBoard(9, 11);
     turn = turn === 'red' ? 'blue' : 'red';
-    currentPoint = getPointAt(4, 5);
+    currentPoint = getPointAt(4, 5, board);
     if (currentPoint) {
         currentPoint.taken = true;
     }
@@ -216,4 +251,5 @@ initializeGame();
 setBoardClick();
 setResetButton();
 setChangeTurnButton();
+setUndoButton();
 export {};
