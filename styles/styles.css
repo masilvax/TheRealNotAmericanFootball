@@ -2,34 +2,38 @@
     --square-size: 50px;
     --grid-line-size: 2px;
     --dot-size: 15px;
-    --main-color: royalblue;
+    --main-color: black;
 }
 
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
 body {
     display: flex;
     flex-direction: column;
-    justify-content: center;
-    align-items: center;
+    align-items: start;
     height: 100vh;
-    background-color: rgb(240, 240, 240);
+    background-color: black;
     font-family: Arial, sans-serif;
+    padding: 24px;
+    gap: 24px;
+    font-family: "Press Start 2P", system-ui;
+    font-weight: 400;
+    font-style: normal;
+    font-size: 14px;
 }
 
 button {
-    font-family: 'Courier New', Courier, monospace;
-    font-size: 1.1rem;
-    color: #000;
-    background: #00ff00;
+    font-family: "Press Start 2P", system-ui;
+    color: black;
+    background: lime;
     border: none;
-    padding: 2px 24px 0;
+    padding: 2px 24px;
     margin: 12px;
-    box-shadow: 10px 10px 0 #000;
+    box-shadow: 10px 10px 0 black;
     text-transform: capitalize;
     letter-spacing: 1px;
     cursor: pointer;
@@ -38,27 +42,55 @@ button {
 }
 
 button:active {
-    background: #00cc00;
-    color: #fff;
-    box-shadow: 0px 0px 0 #000;
+    color: white;
+    box-shadow: 0px 0px 0 black;
     translate: 10px 10px;
-}
-
-button:focus {
-    /* outline: 2px dashed #fff;
-    outline-offset: 2px; */
 }
 
 .btn-wrapper {
     border: 8px double black;
-    margin: 6px;
     padding: 6px;
-    padding-bottom: 12px;;
+    padding-bottom: 12px;
+    background-color: violet;
+    box-shadow: 0 0 0 6px violet;
+    position: relative;
+}
+
+.btn-wrapper::before {
+    content: 'Tu som guziki';
+    position: absolute;
+    top: -12px;
+    left: 16px;
+    background-color: violet;
+    padding: 0 12px;
 }
 
 .square-container {
-    background-color: white;
+    background-color: violet;
     display: grid;
+    border: 8px double black;
+    box-sizing: content-box;
+    position: relative;
+    box-shadow: 0 0 0 6px violet;
+    padding: 12px;
+}
+
+.square-container::before {
+    content: 'Tu szczela czerwony';
+    position: absolute;
+    top: -12px;
+    left: 16px;
+    padding: 0 12px;
+    background-color: violet;
+}
+
+.square-container::after {
+    content: 'Tu szczela niebieski';
+    position: absolute;
+    bottom: -12px;
+    left: 16px;
+    padding: 0 12px;
+    background-color: violet;
 }
 
 .square {
@@ -69,18 +101,21 @@ button:focus {
     position: relative;
 }
 
-.square::before, .square::after {
+.square::before,
+.square::after {
     position: absolute;
     content: '';
-    background-color: rgb(168, 213, 255);
+    background-color: rgb(253, 163, 255);
     pointer-events: none;
 }
 
 .square::before {
     top: 50%;
     left: 0;
-    width: var(--square-size);;
-    height: var(--grid-line-size);;
+    width: var(--square-size);
+    ;
+    height: var(--grid-line-size);
+    ;
 }
 
 .square::after {
@@ -111,17 +146,18 @@ button:focus {
 .square.goal::after {
     top: 0;
     height: var(--square-size);
-    background-color: rgb(0, 143, 0);
+    background-color: lime;
 }
 
-.square .available-dot, .square .current-dot {
+.square .available-dot,
+.square .current-dot {
     display: none;
     position: absolute;
     top: 50%;
     left: 50%;
     width: var(--dot-size);
     height: var(--dot-size);
-    background: rgb(189, 128, 247);
+    background: lime;
     border-radius: 50%;
     transform: translate(-45%, -50%);
     z-index: 999;
@@ -132,9 +168,9 @@ button:focus {
     cursor: pointer;
 }
 
- .square .current-dot {
+.square .current-dot {
     display: block;
- }
+}
 
 .path {
     position: absolute;
@@ -163,6 +199,7 @@ button:focus {
     width: var(--grid-line-size);
     height: var(--square-size);
 }
+
 .path-down {
     top: 50%;
     left: 50%;
