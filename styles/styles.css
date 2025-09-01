@@ -47,7 +47,6 @@ button {
     margin: 12px;
     box-shadow: 10px 10px 0 black;
     text-transform: capitalize;
-    letter-spacing: 1px;
     cursor: pointer;
     min-width: 200px;
     transition: background 0.1s, color 0.1s;
@@ -88,6 +87,7 @@ button:active {
     background-color: violet;
     box-shadow: 0 0 0 6px violet;
     position: relative;
+    min-width: 324px;
 }
 
 .btn-wrapper::before {
